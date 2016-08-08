@@ -1,4 +1,6 @@
 source 'https://rubygems.org'
+gem 'minitest'
 gem 'rake'
 gem 'sinatra'
 gem 'rubyzip'
+gem 'rack-test'
