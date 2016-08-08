@@ -27,10 +27,14 @@ class SSLManagerTest < Minitest::Test
     get '/create?subject=example.com&domainlist=www.example.com,ftp.example.com'
     assert_equal 200, last_response.status
 
+    zipfile = Tempfile.new ['ssl', '.zip']
+    zipfile.write last_response.body
+    zipfile.rewind
+
     key, csr_text = [nil, nil]
 
     # The contents of the .zip file are text files for key and csr
-    Zip::File.open('testzip.zip') do |zip_file|
+    Zip::File.open(zipfile.path) do |zip_file|
       zip_file.each do |entry|
         key = entry.get_input_stream.read if /key$/.match(entry.name)
         csr_text = entry.get_input_stream.read if /csr$/.match(entry.name)
@@ -40,6 +44,9 @@ class SSLManagerTest < Minitest::Test
     assert csr_text
     assert csr = OpenSSL::X509::Request.new(csr_text)
     assert csr.verify(csr.public_key)
-    assert_equal 'test.com', get_domain_from_csr(csr)
+    assert_equal 'example.com', get_domain_from_csr(csr)
+
+    zipfile.unlink
+    zipfile.close
   end
 end

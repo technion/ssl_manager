@@ -2,6 +2,7 @@ require 'sinatra/base'
 require 'openssl'
 require 'tempfile'
 require 'zip'
+require 'json'
 
 class SSLManager < Sinatra::Base
   def subject_alt_name(domains)
@@ -10,7 +11,6 @@ class SSLManager < Sinatra::Base
     ef.create_extension("subjectAltName",
       domains.map { |d| "DNS: #{d}" }.join(','))
   end
-
   def create_csr(rsa_key, subject, domainlist)
     csr = OpenSSL::X509::Request.new
     csr.subject = OpenSSL::X509::Name.new([
@@ -28,6 +28,10 @@ class SSLManager < Sinatra::Base
 
     csr.sign rsa_key, OpenSSL::Digest::SHA256.new
     csr
+  end
+
+  get '/' do
+    File.read(File.join('public', 'index.html'))
   end
 
   get '/create' do
