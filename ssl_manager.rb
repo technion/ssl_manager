@@ -30,10 +30,6 @@ class SSLManager < Sinatra::Base
     csr
   end
 
-  get '/' do
-    'Hello world'
-  end
-
   get '/create' do
     halt 401, 'Missing subject' unless (subject = params['subject'])
     halt 401, 'Missing domainlist' unless (domainlist = params['domainlist'])
