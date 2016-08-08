@@ -2,8 +2,7 @@ require './ssl_manager'
 require 'minitest/autorun'
 require 'rack/test'
 
-
-class SSLManager < Minitest::Test
+class SSLManagerTest < Minitest::Test
   include Rack::Test::Methods
 
   def app
@@ -32,4 +31,3 @@ class SSLManager < Minitest::Test
     assert_equal 'test.com', get_domain_from_csr(csr)
   end
 end
-
