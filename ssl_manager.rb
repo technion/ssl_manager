@@ -14,9 +14,9 @@ class SSLManager < Sinatra::Base
   def create_csr(rsa_key, subject, domainlist)
     csr = OpenSSL::X509::Request.new
     csr.subject = OpenSSL::X509::Name.new([
-      ["C", "AU"],
+      ["C", settings.ssl_config['country']],
       ["ST", "NSW"],
-      ["O", "Organisation"],
+      ["O", settings.ssl_config['organisation']],
       ["CN", subject]
     ])
     csr.public_key = rsa_key.public_key
@@ -39,12 +39,14 @@ class SSLManager < Sinatra::Base
     halt 401, 'Missing domainlist' unless (domainlist = params['domainlist'])
 
     rsa_key = OpenSSL::PKey::RSA.new(2048)
+    rsa_key_encrypted = rsa_key.to_pem(
+      OpenSSL::Cipher.new("AES-128-CBC"), settings.ssl_config['secret'])
     csr = create_csr(rsa_key, subject, domainlist)
     zipfile = Tempfile.new ['ssl', '.zip']
 
     Zip::OutputStream.open(zipfile) do |archive|
       archive.put_next_entry("#{subject}.key")
-      archive.write rsa_key.to_pem
+      archive.write rsa_key_encrypted
       archive.put_next_entry("#{subject}.csr")
       archive.write csr.to_pem
     end

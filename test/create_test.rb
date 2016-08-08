@@ -2,6 +2,11 @@ require './ssl_manager'
 require 'minitest/autorun'
 require 'rack/test'
 
+# GLobal allows it to be used throughout tests.
+config_file = File.read('ssl_manager_config.json-example')
+$ssl_config = JSON.parse(config_file)
+SSLManager.set :ssl_config, $ssl_config
+
 class SSLManagerTest < Minitest::Test
   include Rack::Test::Methods
 
@@ -40,12 +45,23 @@ class SSLManagerTest < Minitest::Test
         csr_text = entry.get_input_stream.read if /csr$/.match(entry.name)
       end
     end
-    assert key
+
+    # Test the delivered CSR is valid and contained the correct domains
     assert csr_text
     assert csr = OpenSSL::X509::Request.new(csr_text)
     assert csr.verify(csr.public_key)
     assert_equal 'example.com', get_domain_from_csr(csr)
 
+    # Test key decrypts
+    assert key
+    assert_raises OpenSSL::PKey::RSAError do
+      OpenSSL::PKey::RSA.new(key, "wrong passphrase")
+    end
+    assert decrypted_key = 
+      OpenSSL::PKey::RSA.new(key, $ssl_config['secret'])
+    assert decrypted_key.private?
+
+    # Cleanup
     zipfile.unlink
     zipfile.close
   end
