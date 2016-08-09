@@ -23,4 +23,9 @@ vim ssl_manager_config.json
 rackup -p 4567 [-o 0.0.0.0]
 ```
 
+For an enterprise-grade production, we recommend JRuby:
+```
+RACK_ENV=production jruby -S rackup -s Puma
+```
+
 Finally, visit the running page in your browser.
