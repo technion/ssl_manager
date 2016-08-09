@@ -31,7 +31,7 @@ class SSLManager < Sinatra::Base
   end
 
   get '/' do
-    File.read(File.join('public', 'index.html'))
+    send_file('public/index.html')
   end
 
   get '/create' do
