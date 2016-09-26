@@ -44,6 +44,7 @@ class SSLManager < Sinatra::Base
     csr = create_csr(rsa_key, subject, domainlist)
     zipfile = Tempfile.new ['ssl', '.zip']
 
+    subject.gsub!(/\*/, 'star')
     Zip::OutputStream.open(zipfile) do |archive|
       archive.put_next_entry("#{subject}.key")
       archive.write rsa_key_encrypted

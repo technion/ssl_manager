@@ -1,6 +1,8 @@
 #\ -o 0.0.0.0 -p 4567
-require './ssl_manager.rb'
+require 'bundler/setup'
 require 'json'
+
+require './ssl_manager.rb'
 
 config_file = File.read('ssl_manager_config.json')
 ssl_config = JSON.parse(config_file)
